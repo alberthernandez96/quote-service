@@ -11,6 +11,11 @@ export class QuoteRepositoryAdapter implements IQuoteRepository {
     return record ? QuoteDomainMapper.fromDatabase(record) : null;
   }
 
+  async findLastRegistry(): Promise<QuoteEntity | null> {
+    const record = await this.postgresRepo.findLastRegistry();
+    return record ? QuoteDomainMapper.fromDatabase(record) : null;
+  }
+
   async save(quote: QuoteEntity): Promise<void> {
     const { quote: quoteRecord, lines } = QuoteDomainMapper.toDatabase(quote);
     await this.postgresRepo.save(quoteRecord, lines);

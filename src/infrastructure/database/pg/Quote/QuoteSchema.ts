@@ -1,6 +1,6 @@
 export const QUOTE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS quotes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   client_id VARCHAR(20) NOT NULL,
   status VARCHAR(50),
   vat NUMERIC(5,2),
@@ -18,7 +18,10 @@ CREATE INDEX IF NOT EXISTS idx_quotes_client_id ON quotes (client_id);
 export const QUOTE_LINES_SCHEMA = `
 CREATE TABLE IF NOT EXISTS quote_lines (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  quote_id UUID NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
+  quote_id INTEGER NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
+  type VARCHAR(50),
+  comment VARCHAR(500),
+
   product_id UUID NOT NULL,
   quantity INTEGER NOT NULL,
   unit_price NUMERIC(12,2) NOT NULL,

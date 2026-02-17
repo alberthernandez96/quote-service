@@ -25,3 +25,9 @@ export class QuoteNotFoundError extends DomainError {
     super(`Quote with id ${id} not found`, QuoteErrorCodes.QUOTE_NOT_FOUND);
   }
 }
+
+export class QuoteLastRegistryNotFoundError extends DomainError {
+  constructor() {
+    super('No quotes found', QuoteErrorCodes.QUOTE_NOT_FOUND);
+  }
+}

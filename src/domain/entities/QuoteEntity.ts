@@ -11,7 +11,7 @@ export class QuoteEntity {
   static create(props: QuoteCreateEntity): QuoteEntity {
     const now = new Date();
     const state: QuoteEntityState = {
-      id: uuidv4(),
+      id: null,
       clientId: props.clientId,
       lines: props.lines,
       status: props.status,
@@ -30,7 +30,7 @@ export class QuoteEntity {
     return new QuoteEntity(state);
   }
 
-  getId(): string {
+  getId(): number | null {
     return this.state.id;
   }
 

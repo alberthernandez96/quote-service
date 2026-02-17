@@ -1,5 +1,5 @@
 export interface QuoteRecord {
-  id: string;
+  id?: number;
   client_id: string;
   status?: string;
   vat?: number;

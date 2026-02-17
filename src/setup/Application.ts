@@ -1,4 +1,5 @@
 import { Server } from 'http';
+import cors from "cors";
 import express, { Express } from 'express';
 import {
   CommandBus,
@@ -16,6 +17,8 @@ import {
   CreateQuoteCommandHandler,
   UpdateQuoteCommand,
   UpdateQuoteCommandHandler,
+  GetLastRegistryQuery,
+  GetLastRegistryQueryHandler,
   GetQuoteQuery,
   GetQuoteQueryHandler,
   GetQuoteListQuery,
@@ -28,12 +31,17 @@ import {
 import { QuoteRepositoryAdapter } from '@infrastructure';
 import { Infrastructure } from './Infrastructure';
 
+
 export class Application {
   private app: Express;
   private server?: Server;
 
   constructor(infrastructure: Infrastructure) {
     this.app = express();
+    // Enable CORS for development
+    if (process.env.NODE_ENV === "development") {
+      this.app.use(cors());
+    }
     this.app.use(express.json());
 
     const commandBus = new CommandBus();
@@ -49,6 +57,7 @@ export class Application {
     queryBus.registerMany([
       { type: GetQuoteQuery, handler: new GetQuoteQueryHandler(quoteRepositoryAdapter) },
       { type: GetQuoteListQuery, handler: new GetQuoteListQueryHandler(quoteRepositoryAdapter) },
+      { type: GetLastRegistryQuery, handler: new GetLastRegistryQueryHandler(quoteRepositoryAdapter) },
     ]);
 
     const quoteCommandController = new QuoteCommandController(commandBus);
@@ -65,6 +74,7 @@ export class Application {
       ValidationMiddleware.validateParams(getQuoteParamsSchema),
       (req, res) => quoteQueryController.get(req, res)
     );
+    this.app.get(QuoteRoutes.getLastRegistry, (req, res) => quoteQueryController.getLastRegistry(req, res));
     this.app.get(QuoteRoutes.getAll, (req, res) => quoteQueryController.getAll(req, res));
     this.app.put(
       QuoteRoutes.update,

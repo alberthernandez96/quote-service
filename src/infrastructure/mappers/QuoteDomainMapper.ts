@@ -5,7 +5,7 @@ import type { QuoteRecord, QuoteRecordWithLines, QuoteLineRecord } from '../data
 export class QuoteDomainMapper {
   static toDatabase(entity: QuoteEntity): { quote: QuoteRecord; lines: QuoteLineRecord[] } {
     const quote: QuoteRecord = {
-      id: entity.getId(),
+      id: entity.getId() ?? 0,
       client_id: entity.getClientId(),
       status: entity.getStatus(),
       vat: entity.getVat(),
@@ -18,7 +18,8 @@ export class QuoteDomainMapper {
     };
     const lines: QuoteLineRecord[] = entity.getLines().map((line, position) => ({
       id: uuidv4(),
-      quote_id: entity.getId(),
+      quote_id: entity.getId() ?? 0,
+      type: line.type,
       product_id: line.productId,
       quantity: line.quantity,
       unit_price: line.unitPrice,
@@ -30,13 +31,16 @@ export class QuoteDomainMapper {
 
   static fromDatabase(record: QuoteRecordWithLines): QuoteEntity {
     const state: QuoteEntityState = {
-      id: record.id,
+      id: record.id!,
       clientId: record.client_id,
       lines: record.lines.map((l) => ({
+        id: l.id,
+        type: l.type,
         productId: l.product_id,
         quantity: l.quantity,
         unitPrice: l.unit_price,
         productName: l.product_name,
+        position: l.position,
       })),
       status: record.status,
       vat: record.vat,

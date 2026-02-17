@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { QuoteDTO, QuoteListResponseDTO, getQuoteListQuerySchema } from '@albertoficial/api-contracts';
 import { QueryBus } from '@albertoficial/backend-shared';
-import { GetQuoteQuery, GetQuoteListQuery } from '@application';
+import { GetLastRegistryQuery, GetQuoteQuery, GetQuoteListQuery } from '@application';
 import { ErrorHandler } from '@presentation';
 
 export class QuoteQueryController {
@@ -16,6 +16,17 @@ export class QuoteQueryController {
       res.status(200).json(result);
     } catch (error: unknown) {
       ErrorHandler.handle(error, res, 'QuoteQueryController.get');
+    }
+  }
+
+  async getLastRegistry(req: Request, res: Response<QuoteDTO>): Promise<void> {
+    try {
+      const result = await this.queryBus.execute<QuoteDTO>(
+        new GetLastRegistryQuery(undefined, req.headers['x-correlation-id'] as string)
+      );
+      res.status(200).json(result);
+    } catch (error: unknown) {
+      ErrorHandler.handle(error, res, 'QuoteQueryController.getLastRegistry');
     }
   }
 
