@@ -6,9 +6,18 @@ export class CreateQuoteCommandHandler implements CommandHandler<CreateQuoteComm
   constructor(private readonly quoteRepository: IQuoteRepository) {}
 
   async handle(command: CreateQuoteCommand): Promise<unknown> {
-    const props = QuoteDtoMapper.fromCreateDto(command.data);
-    const quote = QuoteEntity.create(props);
-    await this.quoteRepository.save(quote);
-    return QuoteDtoMapper.toDto(quote);
+    return command.executeWithTracing(async (cmd) => {
+      const props = QuoteDtoMapper.fromCreateDto(cmd.data);
+      const quote = QuoteEntity.create(props);
+      const quoteId = await this.quoteRepository.save(quote);
+      
+      // Recargar la entidad con el ID generado
+      const savedQuote = await this.quoteRepository.findById(String(quoteId));
+      if (!savedQuote) {
+        throw new Error('Failed to retrieve saved quote');
+      }
+
+      return QuoteDtoMapper.toDto(savedQuote);
+    });
   }
 }

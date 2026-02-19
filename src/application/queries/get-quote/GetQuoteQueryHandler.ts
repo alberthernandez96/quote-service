@@ -6,10 +6,12 @@ export class GetQuoteQueryHandler implements QueryHandler<GetQuoteQuery, unknown
   constructor(private readonly quoteRepository: IQuoteRepository) {}
 
   async handle(query: GetQuoteQuery): Promise<unknown> {
-    const quote = await this.quoteRepository.findById(query.id);
-    if (!quote) {
-      throw new QuoteNotFoundError(query.id);
-    }
-    return QuoteDtoMapper.toDto(quote);
+    return query.executeWithTracing(async (qry) => {
+      const quote = await this.quoteRepository.findById(qry.id);
+      if (!quote) {
+        throw new QuoteNotFoundError(qry.id);
+      }
+      return QuoteDtoMapper.toDto(quote);
+    });
   }
 }

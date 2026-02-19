@@ -29,6 +29,7 @@ import {
   QuoteQueryController,
 } from '@presentation';
 import { QuoteRepositoryAdapter } from '@infrastructure';
+import { observability } from './Observability';
 import { Infrastructure } from './Infrastructure';
 
 
@@ -43,6 +44,12 @@ export class Application {
       this.app.use(cors());
     }
     this.app.use(express.json());
+    
+    // Add tracing middleware BEFORE routes
+    this.app.use(observability.getTracingMiddleware());
+
+    // Expose Prometheus metrics endpoint
+    this.app.get('/metrics', observability.getMetrics());
 
     const commandBus = new CommandBus();
     const queryBus = new QueryBus();
@@ -56,8 +63,8 @@ export class Application {
     ]);
     queryBus.registerMany([
       { type: GetQuoteQuery, handler: new GetQuoteQueryHandler(quoteRepositoryAdapter) },
-      { type: GetQuoteListQuery, handler: new GetQuoteListQueryHandler(quoteRepositoryAdapter) },
       { type: GetLastRegistryQuery, handler: new GetLastRegistryQueryHandler(quoteRepositoryAdapter) },
+      { type: GetQuoteListQuery, handler: new GetQuoteListQueryHandler(quoteRepositoryAdapter) },
     ]);
 
     const quoteCommandController = new QuoteCommandController(commandBus);
@@ -69,12 +76,12 @@ export class Application {
       ValidationMiddleware.validateBody(createQuoteSchema),
       (req, res) => quoteCommandController.create(req, res)
     );
+    this.app.get(QuoteRoutes.getLastRegistry, (req, res) => quoteQueryController.getLastRegistry(req, res));
     this.app.get(
       QuoteRoutes.get,
       ValidationMiddleware.validateParams(getQuoteParamsSchema),
       (req, res) => quoteQueryController.get(req, res)
     );
-    this.app.get(QuoteRoutes.getLastRegistry, (req, res) => quoteQueryController.getLastRegistry(req, res));
     this.app.get(QuoteRoutes.getAll, (req, res) => quoteQueryController.getAll(req, res));
     this.app.put(
       QuoteRoutes.update,
@@ -86,8 +93,10 @@ export class Application {
 
   async start(): Promise<void> {
     const PORT = process.env.PORT || 3004;
+    const logger = observability.getRootLogger();
+    
     this.server = this.app.listen(PORT, () => {
-      console.log(`Quote Service running on port ${PORT}`);
+      logger.info({ port: PORT }, `Quote Service running on port ${PORT}`);
     });
   }
 

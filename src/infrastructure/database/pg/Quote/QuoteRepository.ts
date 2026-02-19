@@ -49,7 +49,7 @@ export class QuoteRepository extends BaseRepository<QuoteRecord> {
     return { ...quote, lines };
   }
 
-  async save(quote: QuoteRecord, lines: QuoteLineRecord[]): Promise<void> {
+  async save(quote: QuoteRecord, lines: QuoteLineRecord[]): Promise<number> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -58,6 +58,7 @@ export class QuoteRepository extends BaseRepository<QuoteRecord> {
       const linesWithQuoteId = lines.map((l) => ({ ...l, quote_id: quoteId }));
       await this.lineRepo.insertMany(linesWithQuoteId, client);
       await client.query('COMMIT');
+      return quoteId;
     } catch (e) {
       await client.query('ROLLBACK');
       throw e;

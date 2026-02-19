@@ -5,12 +5,13 @@ import { QuoteDtoMapper, GetLastRegistryQuery, IQuoteRepository } from '@applica
 export class GetLastRegistryQueryHandler implements QueryHandler<GetLastRegistryQuery, unknown> {
   constructor(private readonly quoteRepository: IQuoteRepository) {}
 
-  async handle(_query: GetLastRegistryQuery): Promise<unknown> {
-    const quote = await this.quoteRepository.findLastRegistry();
-    if (!quote) {
-      throw new QuoteLastRegistryNotFoundError();
-    }
-    return QuoteDtoMapper.toDto(quote);
+  async handle(query: GetLastRegistryQuery): Promise<unknown> {
+    return query.executeWithTracing(async () => {
+      const quote = await this.quoteRepository.findLastRegistry();
+      if (!quote) {
+        throw new QuoteLastRegistryNotFoundError();
+      }
+      return QuoteDtoMapper.toDto(quote);
+    });
   }
 }
-

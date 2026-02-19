@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { observability } from './setup/Observability';
 import { Server } from './setup';
 
 dotenv.config();
@@ -15,18 +16,25 @@ main().catch((err) => {
   process.exit(1);
 });
 
-process.on('SIGTERM', async () => {
-  if (server) {
-    console.log('Shutting down server...');
-    await server.shutdown();
-  }
-  process.exit(0);
-});
+let isShuttingDown = false;
 
-process.on('SIGINT', async () => {
-  if (server) {
-    console.log('Shutting down server...');
-    await server.shutdown();
+async function gracefulShutdown() {
+  if (isShuttingDown) {
+    return;
   }
-  process.exit(0);
-});
+  isShuttingDown = true;
+
+  try {
+    if (server) {
+      await server.shutdown();
+    }
+    await observability.shutdown();
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+  } finally {
+    process.exit(0);
+  }
+}
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);

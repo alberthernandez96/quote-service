@@ -16,9 +16,9 @@ export class QuoteRepositoryAdapter implements IQuoteRepository {
     return record ? QuoteDomainMapper.fromDatabase(record) : null;
   }
 
-  async save(quote: QuoteEntity): Promise<void> {
+  async save(quote: QuoteEntity): Promise<number> {
     const { quote: quoteRecord, lines } = QuoteDomainMapper.toDatabase(quote);
-    await this.postgresRepo.save(quoteRecord, lines);
+    return await this.postgresRepo.save(quoteRecord, lines);
   }
 
   async update(quote: QuoteEntity): Promise<void> {
