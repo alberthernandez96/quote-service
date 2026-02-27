@@ -1,0 +1,1 @@
+export { QuoteQueryController } from './QuoteQueryController';
