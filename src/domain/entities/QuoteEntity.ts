@@ -1,4 +1,7 @@
-import type { QuoteEntityState } from './QuoteEntity.types';
+import type {
+  QuoteEntityState,
+  QuoteLineEntityState,
+} from "./QuoteEntity.types";
 
 export class QuoteEntity {
   private readonly state: QuoteEntityState;
@@ -17,8 +20,15 @@ export class QuoteEntity {
       vat: props.vat,
       dateInit: props.dateInit,
       dateEnd: props.dateEnd,
+      location: props.location,
+      coordinates: props.coordinates,
+      extraLocation: props.extraLocation,
+      percentageDiscount: props.percentageDiscount,
       reference: props.reference,
       createdAt: now.toISOString(),
+      createdBy: props.createdBy,
+      updatedAt: now.toISOString(),
+      updatedBy: props.updatedBy,
     };
     return new QuoteEntity(state);
   }
@@ -35,7 +45,7 @@ export class QuoteEntity {
     return this.state.clientId;
   }
 
-  getLines() {
+  getLines(): QuoteLineEntityState[] {
     return this.state.lines;
   }
 
@@ -47,20 +57,38 @@ export class QuoteEntity {
     return this.state.vat;
   }
 
-  getDateInit(): string {
+  getLocation(): string | undefined {
+    return this.state.location;
+  }
+
+  getCoordinates(): { lat: number; lng: number } | undefined {
+    return this.state.coordinates;
+  }
+
+  getExtraLocation(): number | undefined {
+    return this.state.extraLocation;
+  }
+
+  getDateInit(): string | undefined {
     return this.state.dateInit;
   }
 
-  getDateEnd(): string {
+  getDateEnd(): string | undefined {
     return this.state.dateEnd;
   }
 
   getReference(): string | undefined {
     return this.state.reference;
   }
+  getPercentageDiscount(): number | undefined {
+    return this.state.percentageDiscount;
+  }
 
   getCreatedAt(): string {
     return this.state.createdAt;
+  }
+  getCreatedBy(): string {
+    return this.state.createdBy;
   }
 
   getUpdatedAt(): string | undefined {

@@ -1,7 +1,7 @@
-import type { QuoteEntity } from '@domain';
-import type { IQuoteRepository } from '@application';
-import { QuoteRepository } from '../database';
-import { QuoteDomainMapper } from '../mappers';
+import type { QuoteEntity } from "@domain";
+import type { IQuoteRepository } from "@application";
+import { QuoteRepository } from "../database";
+import { QuoteDomainMapper } from "../mappers";
 
 export class QuoteRepositoryAdapter implements IQuoteRepository {
   constructor(private readonly postgresRepo: QuoteRepository) {}
@@ -17,16 +17,19 @@ export class QuoteRepositoryAdapter implements IQuoteRepository {
   }
 
   async save(quote: QuoteEntity): Promise<number> {
-    const { quote: quoteRecord, lines } = QuoteDomainMapper.toDatabase(quote);
-    return await this.postgresRepo.save(quoteRecord, lines);
+    const quoteRecord = QuoteDomainMapper.toDatabase(quote);
+    return await this.postgresRepo.save(quoteRecord);
   }
 
   async update(quote: QuoteEntity): Promise<void> {
-    const { quote: quoteRecord, lines } = QuoteDomainMapper.toDatabase(quote);
-    await this.postgresRepo.save(quoteRecord, lines);
+    const quoteRecord = QuoteDomainMapper.toDatabase(quote);
+    await this.postgresRepo.save(quoteRecord);
   }
 
-  async list(limit: number, offset: number): Promise<{ items: QuoteEntity[]; total: number }> {
+  async list(
+    limit: number,
+    offset: number,
+  ): Promise<{ items: QuoteEntity[]; total: number }> {
     const { rows, total } = await this.postgresRepo.list(limit, offset);
     return {
       items: rows.map((r) => QuoteDomainMapper.fromDatabase(r)),

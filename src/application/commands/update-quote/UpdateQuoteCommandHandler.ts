@@ -1,8 +1,21 @@
-import { CommandHandler } from '@albertoficial/backend-shared';
-import { QuoteEntity, QuoteIdMismatchError, QuoteNotFoundError, type QuoteEntityState } from '@domain';
-import { QuoteDtoMapper, UpdateQuoteCommand, IQuoteRepository } from '@application';
+import { CommandHandler } from "@albertoficial/backend-shared";
+import {
+  QuoteCreatedByRequiredError,
+  QuoteEntity,
+  QuoteIdMismatchError,
+  QuoteNotFoundError,
+  type QuoteEntityState,
+} from "@domain";
+import {
+  QuoteDtoMapper,
+  UpdateQuoteCommand,
+  IQuoteRepository,
+} from "@application";
 
-export class UpdateQuoteCommandHandler implements CommandHandler<UpdateQuoteCommand, unknown> {
+export class UpdateQuoteCommandHandler implements CommandHandler<
+  UpdateQuoteCommand,
+  unknown
+> {
   constructor(private readonly quoteRepository: IQuoteRepository) {}
 
   async handle(command: UpdateQuoteCommand): Promise<unknown> {
@@ -16,10 +29,12 @@ export class UpdateQuoteCommandHandler implements CommandHandler<UpdateQuoteComm
         throw new QuoteIdMismatchError(cmd.id, cmd.data.id);
       }
 
-      const data = cmd.data;
-      const quoteMapped = QuoteDtoMapper.fromDto(data);
-      const newLines = quoteMapped.lines; // Are comming all. 
-      console.log('newLines', newLines);
+      if (!cmd.updatedBy) {
+        throw new QuoteCreatedByRequiredError();
+      }
+
+      const quoteMapped = QuoteDtoMapper.fromDto(cmd.data, cmd.updatedBy);
+      const newLines = quoteMapped.lines;
 
       const state: QuoteEntityState = {
         ...quoteMapped,

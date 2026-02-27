@@ -2,12 +2,17 @@ export const QUOTE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS quotes (
   id SERIAL PRIMARY KEY,
   client_id VARCHAR(20) NOT NULL,
-  status VARCHAR(50),
-  vat NUMERIC(5,2),
+  status VARCHAR(50) NOT NULL,
+  vat NUMERIC(5,2) NOT NULL,
   date_init TIMESTAMPTZ,
   date_end TIMESTAMPTZ,
   reference VARCHAR(100),
+  location VARCHAR(255),
+  coordinates JSONB,
+  extra_location NUMERIC(12,2),
+  percentage_discount NUMERIC(5,2),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_by VARCHAR(255) NOT NULL,
   updated_at TIMESTAMPTZ,
   updated_by VARCHAR(255)
 );

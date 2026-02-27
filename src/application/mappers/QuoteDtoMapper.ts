@@ -1,14 +1,18 @@
-import type { QuoteRequestDTO, QuoteResponseDTO } from '@albertoficial/api-contracts';
-import type { QuoteEntity, QuoteEntityState } from '@domain';
+import type {
+  QuoteRequestDTO,
+  QuoteResponseDTO,
+} from "@albertoficial/api-contracts";
+import type { QuoteEntity, QuoteEntityState } from "@domain";
 
 export class QuoteDtoMapper {
-  static fromDto(dto: QuoteRequestDTO): QuoteEntityState {
+  static fromDto(dto: QuoteRequestDTO, createdBy: string): QuoteEntityState {
     return {
       ...dto,
       lines: dto.lines.map((line, position) => ({
         ...line,
         position,
       })),
+      createdBy,
     };
   }
 
@@ -22,6 +26,11 @@ export class QuoteDtoMapper {
       dateInit: entity.getDateInit(),
       dateEnd: entity.getDateEnd(),
       createdAt: entity.getCreatedAt(),
+      reference: entity.getReference(),
+      location: entity.getLocation(),
+      coordinates: entity.getCoordinates(),
+      extraLocation: entity.getExtraLocation(),
+      percentageDiscount: entity.getPercentageDiscount(),
     };
   }
 }
