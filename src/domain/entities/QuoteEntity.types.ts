@@ -4,7 +4,7 @@ import { QuoteErrorMessages } from "../errors/QuoteError";
 const QuoteLineSchema = z.object({
   id: z.string().uuid(),
   type: z.string().max(50),
-  productId: z.string().uuid(),
+  productId: z.string().uuid().optional(),
   quantity: z.number().int().min(1),
   unitPrice: z.number().nonnegative(),
   comment: z.string().max(500).optional(),
